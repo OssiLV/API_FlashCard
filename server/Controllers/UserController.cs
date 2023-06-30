@@ -4,6 +4,7 @@ using server.Dtos;
 using server.Dtos.CheckUser;
 using server.Dtos.Register;
 using server.Dtos.SendMail;
+using server.Dtos.User;
 using server.Dtos.User.ConfirmEmail;
 using server.Dtos.User.ResetPassword;
 using server.Services.SendMailService;
@@ -27,7 +28,7 @@ namespace server.Controllers
 
         [Authorize]
         [HttpDelete("delete/{email}")]
-        public async Task<IActionResult> DeleteUser(string email )
+        public async Task<IActionResult> DeleteUser( string email )
         {
             var check = await _userService.DeleteUserByEmail(email);
             if( check ) return Ok(check);
@@ -47,6 +48,7 @@ namespace server.Controllers
 
             return BadRequest(data.Message);
         }
+
         [AllowAnonymous]
         [HttpPost("signup")]
         public async Task<IActionResult> Register( RegisterRequest registerRequest )
@@ -114,6 +116,25 @@ namespace server.Controllers
             var check = await _userService.GoogleLogin(googleRequest);
 
             return Ok(check);
+        }
+
+        [HttpPost("change-user-name")]
+        public async Task<IActionResult> ChangeuserName( ChangeUserNameRequest changeUserNameRequest )
+        {
+            var check = await _userService.ChangeUserName(changeUserNameRequest);
+            if( !check ) return BadRequest("Cannot Find User");
+            return Ok(check);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword( ChangePasswordRequest changePasswordRequest )
+        {
+            var check = await _userService.ChangePassword(changePasswordRequest);
+
+            if( check ) return Ok("Success");
+
+            return BadRequest("Cannot Change Password");
         }
     }
 }

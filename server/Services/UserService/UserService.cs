@@ -7,6 +7,7 @@ using server.Data.Entities;
 using server.Dtos;
 using server.Dtos.CheckUser;
 using server.Dtos.Register;
+using server.Dtos.User;
 using server.Dtos.User.ConfirmEmail;
 using server.Dtos.User.OTP;
 using server.Dtos.User.ResetPassword;
@@ -308,6 +309,33 @@ namespace server.Services.UserService
 
             if( reset.Succeeded ) return true;
 
+            return false;
+        }
+
+        public async Task<bool> ChangeUserName( ChangeUserNameRequest changeUserNameRequest )
+        {
+            var user = await _userManager.FindByEmailAsync(changeUserNameRequest.Email);
+
+            if( user == null )
+            {
+                return false;
+            }
+            if( user.FullName == null )
+            {
+                await _userManager.SetUserNameAsync(user, changeUserNameRequest.NewUserName);
+                return true;
+            }
+
+            await _userManager.SetUserNameAsync(user, changeUserNameRequest.NewUserName);
+            return true;
+        }
+
+        public async Task<bool> ChangePassword( ChangePasswordRequest changePasswordRequest )
+        {
+            var user = await _userManager.FindByEmailAsync(changePasswordRequest.Email);
+            var handleChangePassword = await _userManager.ChangePasswordAsync(user, changePasswordRequest.CurrentPassword, changePasswordRequest.NewPassword);
+
+            if( handleChangePassword.Succeeded ) return true;
             return false;
         }
     }
